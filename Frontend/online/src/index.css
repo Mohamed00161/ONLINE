@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* This ensures that when the .dark class is on the <html> tag, 
+   all children components respond to dark: classes */
