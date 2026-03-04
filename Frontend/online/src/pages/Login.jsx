@@ -10,7 +10,7 @@ const Login = () => {
   const [searchParams] = useSearchParams();
   
   // MUST ADD THESE BACK:
-  const [formData, setFormData] = useState({ email: "", password: "" });
+const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
