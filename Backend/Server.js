@@ -25,14 +25,15 @@ app.use(cookieParser());
 
 // 2. CORS Configuration
 app.use(cors({
-  origin: [
-    "http://localhost:5173", 
-    "https://online-complaints-nu.vercel.app" // Use your actual main Frontend URL
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  origin: "https://online-complaints-nu.vercel.app",
+  credentials: true
 }));
+
+// REMOVE or wrap the app.listen:
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Running on ${PORT}`));
+}
 // Connect Database
 connectDB();
 
