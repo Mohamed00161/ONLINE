@@ -4,13 +4,14 @@
   "type": "module",
   "description": "",
   "main": "Server.js",
- "scripts": {
+  "scripts": {
     "start": "node Server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
