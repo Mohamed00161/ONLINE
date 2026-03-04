@@ -45,14 +45,15 @@ app.use("/api/admin", adminRoutes);
 app.use("/api", profileRoute); // If profileRoute has router.put('/update'), this works.
 app.use("/api/complaints", complaintRoutes);
 
-// 4. Improved Error Handling (Logs the full stack trace for debugging)
-app.use((err, req, res, next) => {
-  console.error("SERVER ERROR STACK:", err.stack);
-  res.status(500).json({ 
-    success: false, 
-    message: err.message || "Internal Server Error" 
-  });
-});
+app.use(cors({
+  origin: "https://online-complaints-nu.vercel.app", // Be specific, no trailing slash
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Add this right after the cors() line to handle Preflight manually
+app.options('*', cors());
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
