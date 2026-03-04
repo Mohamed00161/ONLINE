@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import User from "../Models/User.js"
 import nodemailer from 'nodemailer';
 
-
 // ================= SIGNUP (USERS ONLY) =================
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
@@ -27,48 +26,42 @@ export const signup = async (req, res) => {
   res.status(201).json({ message: "Signup successful" });
 };
 
-
 // ================= LOGIN (USER + ADMIN + EMPLOYEE) =================
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Validation
     if (!email || !password) {
       return res.status(400).json({ message: "All fields required" });
     }
 
-    // 2. Find User
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // 3. Employee Setup Check
     if (user.role === "employee" && (!user.password || !user.isActive)) {
       return res.status(403).json({
         message: "Please complete account setup using the email invitation.",
       });
     }
 
-    // 4. Password Verification
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // 5. Generate JWT Token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
 
-    // 6. SUCCESS RESPONSE (The Fix is here)
-    // We check if avatar is a Cloudinary URL (starts with http) or a local path
-    const avatarUrl = user.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('https'))
+    // FIX: Removed hardcoded 'localhost:5000'. 
+    // If not a Cloudinary URL, it uses the Render URL or just the path.
+    const avatarUrl = user.avatar && (user.avatar.startsWith('http'))
       ? user.avatar 
-      : user.avatar ? `http://localhost:5000${user.avatar}` : null;
+      : user.avatar ? `${process.env.BACKEND_URL}${user.avatar}` : null;
 
     res.json({
       message: "Login successful",
@@ -77,7 +70,7 @@ export const login = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      avatar: avatarUrl, // This will now correctly show Cloudinary images
+      avatar: avatarUrl,
       joined: user.createdAt,
     });
 
@@ -86,42 +79,41 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-// forget password
 
+// ================= FORGET PASSWORD =================
 export const forgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // check if user exists
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User doesn’t exist" });
     }
 
-    // generate reset token
     const resetToken = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "10m" }
     );
 
-    // configure transporter
-  // Looking to send emails in production? Check out our Email API/SMTP product!
+    // FIX: In production, use your real email service credentials (like Resend or Gmail)
+    // instead of the Mailtrap sandbox which only you can see.
     const transporter = nodemailer.createTransport({
-      host: "sandbox.smtp.mailtrap.io",
-      port: 2525,
+      service: 'gmail', // Example: using Gmail
       auth: {
-        user: "9c996bc04a2585",
-        pass: "bd9e5e5b02d4d7"
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
     });
 
-    // send email
+    // FIX: Changed localhost:5173 to your actual Vercel Frontend URL
+    const resetLink = `${process.env.FRONTEND_URL}/Resetpassword/${resetToken}`;
+
     await transporter.sendMail({
-      from: "support@test.com",
+      from: process.env.EMAIL_USER,
       to: email,
       subject: "Password Reset",
-      html: `<p>Click this link to reset your password: <a href="http://localhost:5173/Resetpassword/${resetToken}">Reset Password</a></p>`,
+      html: `<p>Click this link to reset your password: <a href="${resetLink}">Reset Password</a></p>`,
     });
 
     res.status(200).json({ message: "Reset email sent" });
@@ -131,7 +123,6 @@ export const forgetPassword = async (req, res) => {
   }
 };
 
-
 // ================= RESET PASSWORD =================
 export const Resetpassword = async (req, res) => {
   try {
@@ -140,25 +131,19 @@ export const Resetpassword = async (req, res) => {
 
     if (!token) return res.status(400).json({ message: "Token is missing" });
 
-    // verify token
     const verifiedToken = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(verifiedToken.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // hash new password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // update password
     user.password = hashedPassword;
     await user.save();
 
     res.json({ message: "Password has been reset successfully ✅" });
   } catch (err) {
-    console.error(err);
     if (err.name === "TokenExpiredError") {
       return res.status(400).json({ message: "Token has expired ❌" });
     }
     res.status(500).json({ message: "Internal server error ❌" });
   }
 };
-
