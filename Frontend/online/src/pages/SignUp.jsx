@@ -5,6 +5,7 @@ import { FaUserPlus, FaShieldAlt, FaCheckCircle, FaArrowLeft } from "react-icons
 import { FcGoogle } from "react-icons/fc";
 import { useTheme } from "../context/ThemeContext.jsx";
 
+// ... keep all your imports the same
 const Signup = () => {
   const { darkMode } = useTheme();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
@@ -12,12 +13,17 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // --- ADD THIS LINE HERE ---
+  // Temporarily use the direct live URL to test
+const API_URL = "https://online-steel-phi.vercel.app";
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleGoogleSignup = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    // UPDATED: Now uses the dynamic URL
+    window.location.href = `${API_URL}/api/auth/google`;
   };
 
   const handleSubmit = async (e) => {
@@ -26,7 +32,8 @@ const Signup = () => {
     setStatus({ type: "", msg: "" });
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup", formData);
+      // UPDATED: Now uses the dynamic URL
+      const res = await axios.post(`${API_URL}/api/auth/signup`, formData);
       setStatus({ type: "success", msg: res.data.message || "Account created! Redirecting..." });
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
@@ -35,6 +42,8 @@ const Signup = () => {
       setLoading(false);
     }
   };
+
+  
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300">

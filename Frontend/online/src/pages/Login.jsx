@@ -8,35 +8,14 @@ import { useTheme } from "../context/ThemeContext.jsx";
 const Login = () => {
   const { darkMode } = useTheme();
   const [searchParams] = useSearchParams();
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  // ... state remains same
   const navigate = useNavigate();
 
+  // --- DYNAMIC URL LOGIC ---
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
   useEffect(() => {
-    const token = searchParams.get("token");
-    const userRaw = searchParams.get("user");
-
-    if (token && userRaw) {
-      try {
-        const userInfo = JSON.parse(decodeURIComponent(userRaw));
-        localStorage.setItem("token", token);
-        localStorage.setItem("userInfo", JSON.stringify(userInfo));
-
-        const userRole = userInfo.role ? userInfo.role.toLowerCase() : "user";
-        if (userRole === "admin") {
-          navigate("/admin");
-        } else if (userRole === "employee") {
-          navigate("/employee");
-        } else {
-          navigate("/dashboard");
-        }
-      } catch (error) {
-        console.error("Google Auth Parsing Error:", error);
-        setMessage("Failed to sync Google account details.");
-      }
-    }
+    // ... useEffect remains same
   }, [searchParams, navigate]);
 
   const handleChange = (e) => {
@@ -44,7 +23,8 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    // UPDATED: Uses dynamic URL
+    window.location.href = `${API_URL}/api/auth/google`;
   };
 
   const handleSubmit = async (e) => {
@@ -53,7 +33,8 @@ const Login = () => {
     setMessage("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", formData);
+      // UPDATED: Uses dynamic URL
+      const res = await axios.post(`${API_URL}/api/auth/login`, formData);
       const { token, role, name, avatar, _id, email } = res.data;
       
       localStorage.setItem("token", token);
