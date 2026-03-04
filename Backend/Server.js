@@ -5,12 +5,12 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 
 // Routes
-import authRoute from "../Routes/auth.js"
-import adminRoutes from "../Routes/admin.js"
-import profileRoute from "../Routes/profile.js"
-import complaintRoutes from "../Routes/complaint.js"
-import passport from '../config/passport.js'
-import sendEmail from "../utils/sendEmail.js"
+import authRoute from "../Backend/Routes/auth.js"
+import adminRoutes from "../Backend/Routes/admin.js"
+import profileRoute from "../Backend/Routes/profile.js"
+import complaintRoutes from "../Backend/Routes/complaint.js"
+import passport from '../Backend/config/passport.js'
+import sendEmail from "../Backend/utils/sendEmail.js"
 
 dotenv.config();
 
@@ -54,7 +54,7 @@ app.use(cors({
 }));
 
 // Add this right after the cors() line to handle Preflight manually
-app.options('*', cors());
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
