@@ -5,12 +5,12 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 
 // Routes
-import authRoute from "./Routes/auth.js";
-import adminRoutes from "./Routes/admin.js";
-import profileRoute from "./Routes/profile.js";
-import complaintRoutes from "./Routes/complaint.js";
-import passport from "./config/passport.js"
-import sendEmail from "./utils/sendEmail.js"
+import authRoute from "../Routes/auth.js"
+import adminRoutes from "../Routes/admin.js"
+import profileRoute from "../Routes/profile.js"
+import complaintRoutes from "../Routes/complaint.js"
+import passport from '../config/passport.js'
+import sendEmail from "../utils/sendEmail.js"
 
 dotenv.config();
 
