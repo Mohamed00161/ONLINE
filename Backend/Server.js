@@ -25,15 +25,18 @@ app.use(cookieParser());
 
 // 2. CORS Configuration
 app.use(cors({
-  origin: [
-    "http://localhost:5173", 
-    "https://online-frontend-six.vercel.app", // Replace this with your EXACT frontend URL from Vercel
-  ],
+  origin: function (origin, callback) {
+    // Allow local development
+    if (!origin || origin.startsWith("http://localhost") || origin.endsWith(".vercel.app")) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
 // Connect Database
 connectDB();
 
