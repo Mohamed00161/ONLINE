@@ -9,16 +9,15 @@ const Login = () => {
   const { darkMode } = useTheme();
   const [searchParams] = useSearchParams();
   
-  // FIXED: Restored the state variables that were missing
+  // MUST ADD THESE BACK:
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
-
-  // DYNAMIC URL LOGIC
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  // ... rest of the file
 
   useEffect(() => {
     const token = searchParams.get("token");
