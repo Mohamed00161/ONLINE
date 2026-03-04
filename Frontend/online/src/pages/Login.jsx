@@ -7,9 +7,7 @@ import { useTheme } from "../context/ThemeContext.jsx";
 
 const Login = () => {
   const { darkMode } = useTheme();
-  const [searchParams] = useSearchParams();
-  
-  // MUST ADD THESE BACK:
+  const [searchParams] = useSearchParams();  
 const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
