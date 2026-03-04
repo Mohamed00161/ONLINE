@@ -25,9 +25,10 @@ app.use(cookieParser());
 
 // 2. CORS Configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === "production" 
-    ? ["https://your-frontend-domain.vercel.app"] // Replace with your actual Vercel frontend URL later
-    : "http://localhost:5173",
+  origin: [
+    "http://localhost:5173", 
+    "https://online-frontend-six.vercel.app", // Replace this with your EXACT frontend URL from Vercel
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
