@@ -1,21 +1,48 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { FaSignInAlt, FaShieldAlt, FaEye, FaEyeSlash, FaArrowLeft } from "react-icons/fa"; // Added FaArrowLeft
+import { FaSignInAlt, FaShieldAlt, FaEye, FaEyeSlash, FaArrowLeft } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { useTheme } from "../context/ThemeContext.jsx";
 
 const Login = () => {
   const { darkMode } = useTheme();
   const [searchParams] = useSearchParams();
-  // ... state remains same
+  
+  // FIXED: Restored the state variables that were missing
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  
   const navigate = useNavigate();
 
-  // --- DYNAMIC URL LOGIC ---
+  // DYNAMIC URL LOGIC
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   useEffect(() => {
-    // ... useEffect remains same
+    const token = searchParams.get("token");
+    const userRaw = searchParams.get("user");
+
+    if (token && userRaw) {
+      try {
+        const userInfo = JSON.parse(decodeURIComponent(userRaw));
+        localStorage.setItem("token", token);
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+        const userRole = userInfo.role ? userInfo.role.toLowerCase() : "user";
+        if (userRole === "admin") {
+          navigate("/admin");
+        } else if (userRole === "employee") {
+          navigate("/employee");
+        } else {
+          navigate("/dashboard");
+        }
+      } catch (error) {
+        console.error("Google Auth Parsing Error:", error);
+        setMessage("Failed to sync Google account details.");
+      }
+    }
   }, [searchParams, navigate]);
 
   const handleChange = (e) => {
@@ -23,7 +50,6 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    // UPDATED: Uses dynamic URL
     window.location.href = `${API_URL}/api/auth/google`;
   };
 
@@ -33,7 +59,6 @@ const Login = () => {
     setMessage("");
 
     try {
-      // UPDATED: Uses dynamic URL
       const res = await axios.post(`${API_URL}/api/auth/login`, formData);
       const { token, role, name, avatar, _id, email } = res.data;
       
@@ -56,8 +81,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300">
-      
-      {/* LEFT SIDEBAR - DESKTOP */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
@@ -69,7 +92,6 @@ const Login = () => {
         </div>
 
         <div className="relative z-10 text-white max-w-md">
-          {/* 1. Clickable Logo on Desktop Sidebar */}
           <Link to="/" className="group inline-flex flex-col items-start mb-12">
             <div className="bg-white/20 w-16 h-16 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-md border border-white/30 shadow-2xl group-hover:bg-white/30 transition-all">
                 <FaShieldAlt size={32} />
@@ -78,24 +100,19 @@ const Login = () => {
                 FixIt <br /><span className="text-emerald-400">Rural Link.</span>
             </h1>
           </Link>
-          
           <p className="text-white text-lg font-bold leading-relaxed drop-shadow-md bg-black/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10">
             Connecting remote communities with digital infrastructure management and rapid complaint resolution.
           </p>
         </div>
       </div>
 
-      {/* RIGHT SIDE - FORM */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-20 z-10">
         <div className="w-full max-w-md">
-          
-          {/* 2. "Back to home" Link (Always visible for easy navigation) */}
           <Link to="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 dark:hover:text-emerald-400 mb-8 transition-colors">
             <FaArrowLeft /> Back to home
           </Link>
 
           <div className="mb-8 text-center lg:text-left">
-            {/* 3. Clickable Logo for Mobile View */}
             <Link to="/" className="flex items-center justify-center lg:justify-start gap-2 text-indigo-600 dark:text-emerald-400 font-black text-2xl tracking-tighter mb-10 lg:hidden">
                 <FaShieldAlt /> FixIt.
             </Link>
