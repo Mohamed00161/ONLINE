@@ -56,7 +56,6 @@ const Login = () => {
     setMessage("");
 
     try {
-      // --- DIRECT URL USED HERE ---
       const res = await axios.post("https://backend-ml27.onrender.com/api/auth/login", formData);
       
       const { token, role, name, avatar, _id, email } = res.data;
