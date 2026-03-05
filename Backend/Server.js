@@ -5,12 +5,12 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 
 // Routes
-import authRoute from "../Backend/Routes/auth.js"
-import adminRoutes from "../Backend/Routes/admin.js"
-import profileRoute from "../Backend/Routes/profile.js"
-import complaintRoutes from "../Backend/Routes/complaint.js"
-import passport from '../Backend/config/passport.js'
-import sendEmail from "../Backend/utils/sendEmail.js"
+import authRoute from "./Routes/auth.js"
+import adminRoutes from "./Routes/admin.js"
+import profileRoute from "./Routes/profile.js"
+import complaintRoutes from "./Routes/complaint.js"
+import passport from './config/passport.js'
+import sendEmail from "./utils/sendEmail.js"
 
 dotenv.config();
 
@@ -23,11 +23,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(passport.initialize());
 app.use(cookieParser());
 
-// 2. CORS Configuration
-app.use(cors({
-  origin: "https://online-complaints-nu.vercel.app",
-  credentials: true
-}));
+
 
 // REMOVE or wrap the app.listen:
 if (process.env.NODE_ENV !== 'production') {
