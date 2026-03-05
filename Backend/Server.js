@@ -47,7 +47,10 @@ app.use("/api", profileRoute); // If profileRoute has router.put('/update'), thi
 app.use("/api/complaints", complaintRoutes);
 
 app.use(cors({
-  origin: "https://online-complaints-nu.vercel.app", // Be specific, no trailing slash
+  origin: [
+    "https://online-complaints-nu.vercel.app", // Your main domain
+    "https://online-complaints-ful0wwtco-mohas-projects-fe844359.vercel.app" // The specific one in your error
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
