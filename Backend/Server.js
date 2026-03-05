@@ -53,6 +53,9 @@ app.use(cors({
 
 // Add this right after the cors() line to handle Preflight manually
 
+app.get("/test", (req, res) => {
+  res.send("Server is alive and reaching this point!");
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
