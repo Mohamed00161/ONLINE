@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUserPlus, FaShieldAlt, FaCheckCircle, FaArrowLeft } from "react-icons/fa"; // Added FaArrowLeft
+import { FaUserPlus, FaShieldAlt, FaCheckCircle, FaArrowLeft } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { useTheme } from "../context/ThemeContext.jsx";
 
-// ... keep all your imports the same
 const Signup = () => {
   const { darkMode } = useTheme();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
@@ -13,16 +12,16 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // --- ADD THIS LINE HERE ---
-  // Temporarily use the direct live URL to test
-const API_URL = "https://online-steel-phi.vercel.app";
+  // FIX: Use your LIVE Render URL here. 
+  // Professional tip: use import.meta.env.VITE_API_URL if you set up a .env file
+  const API_URL = "https://your-backend-name.onrender.com"; 
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleGoogleSignup = () => {
-    // UPDATED: Now uses the dynamic URL
+    // Redirects to the Passport.js route on your Render Backend
     window.location.href = `${API_URL}/api/auth/google`;
   };
 
@@ -32,18 +31,26 @@ const API_URL = "https://online-steel-phi.vercel.app";
     setStatus({ type: "", msg: "" });
 
     try {
-      // UPDATED: Now uses the dynamic URL
+      // Sends data to your Render Backend
       const res = await axios.post(`${API_URL}/api/auth/signup`, formData);
-      setStatus({ type: "success", msg: res.data.message || "Account created! Redirecting..." });
+      
+      setStatus({ 
+        type: "success", 
+        msg: res.data.message || "Account created! Redirecting to login..." 
+      });
+      
+      // Delay navigation so user can see the success message
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setStatus({ type: "error", msg: err.response?.data?.message || "Signup failed." });
+      // Captures the error message sent from your usercontroller.js
+      setStatus({ 
+        type: "error", 
+        msg: err.response?.data?.message || "Signup failed. Please try again." 
+      });
     } finally {
       setLoading(false);
     }
   };
-
-  
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300">
@@ -60,7 +67,6 @@ const API_URL = "https://online-steel-phi.vercel.app";
         </div>
 
         <div className="relative z-10 text-white max-w-md">
-          {/* 1. Clickable Logo on Desktop Sidebar */}
           <Link to="/" className="group inline-flex flex-col items-start mb-12">
             <div className="bg-white/20 w-16 h-16 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-md border border-white/30 shadow-2xl group-hover:bg-white/30 transition-all">
               <FaShieldAlt size={32} />
@@ -85,13 +91,11 @@ const API_URL = "https://online-steel-phi.vercel.app";
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-20 z-10">
         <div className="w-full max-w-md">
           
-          {/* 2. "Back to home" Breadcrumb Link */}
           <Link to="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 dark:hover:text-emerald-400 mb-8 transition-colors">
             <FaArrowLeft /> Back to home
           </Link>
 
           <div className="mb-8 text-center lg:text-left">
-            {/* 3. Clickable Logo for Mobile View */}
             <Link to="/" className="flex items-center justify-center lg:justify-start gap-2 text-indigo-600 dark:text-emerald-400 font-black text-2xl tracking-tighter mb-8 lg:hidden">
                 <FaShieldAlt /> FixIt.
             </Link>
@@ -131,7 +135,7 @@ const API_URL = "https://online-steel-phi.vercel.app";
               <input
                 type="text"
                 name="name"
-                placeholder="mohamed osman"
+                placeholder="Full Name"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -144,7 +148,7 @@ const API_URL = "https://online-steel-phi.vercel.app";
               <input
                 type="email"
                 name="email"
-                placeholder="mohamed@example.com"
+                placeholder="email@example.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
