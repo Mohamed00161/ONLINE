@@ -12,17 +12,13 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // FIX: Use your LIVE Render URL here. 
-  // Professional tip: use import.meta.env.VITE_API_URL if you set up a .env file
-  const API_URL = "https://your-backend-name.onrender.com"; 
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleGoogleSignup = () => {
-    // Redirects to the Passport.js route on your Render Backend
-    window.location.href = `${API_URL}/api/auth/google`;
+    // Direct URL for Google Auth
+    window.location.href = "https://backend-ml27.onrender.com/api/auth/google";
   };
 
   const handleSubmit = async (e) => {
@@ -31,18 +27,16 @@ const Signup = () => {
     setStatus({ type: "", msg: "" });
 
     try {
-      // Sends data to your Render Backend
-      const res = await axios.post(`${API_URL}/api/auth/signup`, formData);
+      // --- DIRECT URL AS REQUESTED ---
+      const res = await axios.post("https://backend-ml27.onrender.com/api/auth/signup", formData);
       
       setStatus({ 
         type: "success", 
         msg: res.data.message || "Account created! Redirecting to login..." 
       });
       
-      // Delay navigation so user can see the success message
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      // Captures the error message sent from your usercontroller.js
       setStatus({ 
         type: "error", 
         msg: err.response?.data?.message || "Signup failed. Please try again." 

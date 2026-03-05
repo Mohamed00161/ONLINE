@@ -8,15 +8,14 @@ import { useTheme } from "../context/ThemeContext.jsx";
 const Login = () => {
   const { darkMode } = useTheme();
   const [searchParams] = useSearchParams();  
-const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-  // ... rest of the file
 
+  // Handle Google Auth Redirect Logic
   useEffect(() => {
     const token = searchParams.get("token");
     const userRaw = searchParams.get("user");
@@ -47,7 +46,8 @@ const [formData, setFormData] = useState({ email: "", password: "" });
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${API_URL}/api/auth/google`;
+    // DIRECT URL for Google Login
+    window.location.href = "https://backend-ml27.onrender.com/api/auth/google";
   };
 
   const handleSubmit = async (e) => {
@@ -56,7 +56,9 @@ const [formData, setFormData] = useState({ email: "", password: "" });
     setMessage("");
 
     try {
-      const res = await axios.post(`${API_URL}/api/auth/login`, formData);
+      // --- DIRECT URL USED HERE ---
+      const res = await axios.post("https://backend-ml27.onrender.com/api/auth/login", formData);
+      
       const { token, role, name, avatar, _id, email } = res.data;
       
       localStorage.setItem("token", token);
@@ -78,6 +80,8 @@ const [formData, setFormData] = useState({ email: "", password: "" });
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300">
+      
+      {/* LEFT SIDE: HERO SECTION */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
@@ -103,6 +107,7 @@ const [formData, setFormData] = useState({ email: "", password: "" });
         </div>
       </div>
 
+      {/* RIGHT SIDE: LOGIN FORM */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-20 z-10">
         <div className="w-full max-w-md">
           <Link to="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 dark:hover:text-emerald-400 mb-8 transition-colors">
@@ -144,7 +149,7 @@ const [formData, setFormData] = useState({ email: "", password: "" });
               <input
                 type="email"
                 name="email"
-                placeholder="sahra@gmail.com"
+                placeholder="email@example.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
