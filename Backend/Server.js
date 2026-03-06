@@ -43,14 +43,11 @@ app.use("/api", profileRoute); // If profileRoute has router.put('/update'), thi
 app.use("/api/complaints", complaintRoutes);
 
 app.use(cors({
-  origin: [
-    "https://online-complaints-nu.vercel.app", // Your main domain
-  ],
+  origin: "https://online-complaints-nu.vercel.app", 
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
 // Add this right after the cors() line to handle Preflight manually
 
 app.get("/test", (req, res) => {

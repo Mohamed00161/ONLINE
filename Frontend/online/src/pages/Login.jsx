@@ -69,9 +69,19 @@ const Login = () => {
       else if (userRole === "employee") navigate("/employee");
       else navigate("/dashboard");
 
-    } catch (err) {
+} catch (err) {
       console.error("Login Error:", err);
-      setMessage(err.response?.data?.message || "Invalid credentials.");
+      
+      // Better error handling to see if it's a 404 or a 500
+      if (err.response) {
+        // The server responded with a status code outside the 2xx range
+        setMessage(err.response.data?.message || `Server Error: ${err.response.status}`);
+      } else if (err.request) {
+        // The request was made but no response was received
+        setMessage("No response from server. Check your internet or backend status.");
+      } else {
+        setMessage("Error setting up request.");
+      }
     } finally {
       setLoading(false);
     }
