@@ -5,7 +5,7 @@ const MyComplaints = () => {
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
-    API.get("http://localhost:5000/api/complaints")
+    API.get("https://backend-ml27.onrender.com/api/complaints")
       .then((res) => setComplaints(res.data))
       .catch(() => alert("Error fetching complaints"));
   }, []);

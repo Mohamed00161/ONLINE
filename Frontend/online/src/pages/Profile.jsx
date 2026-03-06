@@ -36,7 +36,7 @@ const Profile = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
       
-      const res = await axios.get("http://localhost:5000/api/profile", {
+      const res = await axios.get("https://backend-ml27.onrender.com/api/profile", {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -72,7 +72,7 @@ const Profile = () => {
 
       const payload = { ...generalForm, avatar: base64Image };
       
-      const res = await axios.put("http://localhost:5000/api/update", payload, {
+      const res = await axios.put("https://backend-ml27.onrender.com/api/update", payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
