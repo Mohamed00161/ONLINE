@@ -19,7 +19,7 @@ connectDB();
 
 // 2. CORS CONFIGURATION (MUST BE FIRST!)
 app.use(cors({
-  origin:  "https://online-ehpu.onrender.com",
+  origin: process.env.FRONTEND_URL,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
