@@ -19,7 +19,7 @@ connectDB();
 
 const allowedOrigins = [
   "https://online-complaints-nu.vercel.app",
-  "https://online-complaints-mp7of7bc8-mohas-projects-fe844359.vercel.app"
+  
 ];
 
 // 2. CORS CONFIGURATION (MUST BE FIRST!)
