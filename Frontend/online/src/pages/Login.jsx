@@ -47,7 +47,7 @@ const Login = () => {
 
   const handleGoogleLogin = () => {
     // DIRECT URL for Google Login
-    window.location.href = "https://backend-ml27.onrender.com/api/auth/google";
+    window.location.href = "https://online-backend-8qpj.onrender.com/api/auth/google";
   };
 
   const handleSubmit = async (e) => {
@@ -56,7 +56,7 @@ const Login = () => {
     setMessage("");
 
     try {
-      const res = await axios.post("https://backend-ml27.onrender.com/api/auth/login", formData);
+      const res = await axios.post("https://online-backend-8qpj.onrender.com/api/auth/login", formData);
       
       const { token, role, name, avatar, _id, email } = res.data;
       
