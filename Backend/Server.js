@@ -37,7 +37,7 @@ app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
 
 // 5. TEST ROUTE
-app.get("https://online-backend-8khb.onrender.com", (req, res) => {
+app.get("/", (req, res) => {
   res.send("Online Complaints Backend Running");
 });
 
