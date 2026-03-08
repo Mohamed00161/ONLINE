@@ -17,10 +17,7 @@ const app = express();
 // 1. CONNECT DATABASE
 connectDB();
 
-const allowedOrigins = [
-  "https://online-complaints-nu.vercel.app",
-  
-];
+
 
 // 2. CORS CONFIGURATION (MUST BE FIRST!)
 app.use(cors({
