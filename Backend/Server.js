@@ -19,14 +19,29 @@ connectDB();
 
 
 
-// 2. CORS CONFIGURATION (MUST BE FIRST!)
+// 2. CORS CONFIGURATION
+const allowedOrigins = [
+  process.env.FRONTEND_URL, // main frontend
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: function (origin, callback) {
+    // allow requests with no origin (mobile apps / curl)
+    if (!origin) return callback(null, true);
+
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith(".vercel.app")
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
 // 3. MIDDLEWARE
 app.use(express.json({ limit: "50mb" })); 
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
