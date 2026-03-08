@@ -50,7 +50,7 @@ const UserDashboard = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return navigate("/login");
-      const res = await axios.get("https://backend-ml27.onrender.com/api/profile", {
+      const res = await axios.get("https://online-backend-8khb.onrender.com/api/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(res.data);
@@ -60,7 +60,7 @@ const UserDashboard = () => {
   const fetchUserComplaints = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://backend-ml27.onrender.com/api/complaints/my", {
+      const res = await axios.get("https://online-backend-8khb.onrender.com/api/complaints/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setComplaints(res.data || []);
@@ -71,7 +71,7 @@ const UserDashboard = () => {
     if (!window.confirm("Delete this report permanently?")) return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`https://backend-ml27.onrender.com/api/complaints/${id}`, {
+      await axios.delete(`https://online-backend-8khb.onrender.com/api/complaints/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchUserComplaints();

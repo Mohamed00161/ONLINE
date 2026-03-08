@@ -40,7 +40,7 @@ const EmployeeDashboard = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return navigate("/login");
-      const res = await axios.get("https://backend-ml27.onrender.com/api/profile", {
+      const res = await axios.get("https://online-backend-8khb.onrender.com/api/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(res.data);
@@ -50,7 +50,7 @@ const EmployeeDashboard = () => {
   const fetchComplaints = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://backend-ml27.onrender.com/api/complaints/assigned", {
+      const res = await axios.get("https://online-backend-8khb.onrender.com/api/complaints/assigned", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setComplaints(res.data || []);
@@ -77,7 +77,7 @@ const EmployeeDashboard = () => {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`https://backend-ml27.onrender.com/api/complaints/${selectedTask._id}/resolve`, 
+      await axios.put(`https://online-backend-8khb.onrender.com/api/complaints/${selectedTask._id}/resolve`, 
         { note: resolutionNote, status: "Resolved" },
         { headers: { Authorization: `Bearer ${token}` } }
       );

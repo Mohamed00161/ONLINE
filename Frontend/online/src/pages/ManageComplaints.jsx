@@ -5,13 +5,13 @@ const ManageComplaints = () => {
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
-    API.get("https://backend-ml27.onrender.com/api/complaints")
+    API.get("https://online-backend-8khb.onrender.com/api/complaints")
       .then((res) => setComplaints(res.data))
       .catch(() => alert("Error"));
   }, []);
 
   const updateStatus = async (id, status) => {
-    await API.put(`https://backend-ml27.onrender.com/api/complaints/${id}`, { status });
+    await API.put(`https://online-backend-8khb.onrender.com/api/complaints/${id}`, { status });
     setComplaints(
       complaints.map((c) =>
         c._id === id ? { ...c, status } : c

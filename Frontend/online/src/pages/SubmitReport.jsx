@@ -12,7 +12,7 @@ const SubmitReport = () => {
     try {
       const token = localStorage.getItem("token");
       // POST URL for submitting report
-      await axios.post("https://backend-ml27.onrender.com/api/reports/submit", reportData, {
+      await axios.post("https://online-backend-8khb.onrender.com/api/reports/submit", reportData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Report submitted to Admin successfully!");

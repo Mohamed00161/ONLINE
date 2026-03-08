@@ -18,7 +18,7 @@ const SubmitComplaint = ({ fetchComplaints }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://backend-ml27.onrender.com/api/complaints", {
+      const response = await fetch("https://online-backend-8khb.onrender.com/api/complaints", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

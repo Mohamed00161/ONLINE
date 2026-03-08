@@ -15,7 +15,7 @@ const EmployeeRegister = () => {
     setLoading(true);
 
     try {
-      await axios.post(`https://backend-ml27.onrender.com/api/admin/employee/register/${token}`, {
+      await axios.post(`https://online-backend-8khb.onrender.com/api/admin/employee/register/${token}`, {
         password,
       });
 

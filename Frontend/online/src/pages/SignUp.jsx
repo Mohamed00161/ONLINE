@@ -18,7 +18,7 @@ const Signup = () => {
 
   const handleGoogleSignup = () => {
     // Direct URL for Google Auth
-    window.location.href = "https://backend-ml27.onrender.com/api/auth/google";
+    window.location.href = "https://online-backend-8khb.onrender.com/api/auth/google";
   };
 
   const handleSubmit = async (e) => {
@@ -28,7 +28,7 @@ const Signup = () => {
 
     try {
       // --- DIRECT URL AS REQUESTED ---
-      const res = await axios.post("https://backend-ml27.onrender.com/api/auth/signup", formData);
+      const res = await axios.post("https://online-backend-8khb.onrender.com/api/auth/signup", formData);
       
       setStatus({ 
         type: "success", 

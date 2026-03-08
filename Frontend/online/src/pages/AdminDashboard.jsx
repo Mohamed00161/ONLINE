@@ -102,8 +102,8 @@ const AdminDashboard = () => {
     const config = { headers: { Authorization: `Bearer ${token}` } };
     try {
       const [compRes, empRes] = await Promise.all([
-        axios.get("https://backend-ml27.onrender.com/api/complaints", config),
-        axios.get("https://backend-ml27.onrender.com/api/admin/employees", config),
+        axios.get("https://online-backend-8khb.onrender.com/api/complaints", config),
+        axios.get("https://online-backend-8khb.onrender.com/admin/employees", config),
       ]);
       setComplaints(compRes.data || []);
       setEmployees(empRes.data || []);
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
   const fetchAdminProfile = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://backend-ml27.onrender.com/api/profile", {
+      const res = await axios.get("https://online-backend-8khb.onrender.com/api/profile", {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data) setAdmin(res.data);
@@ -124,7 +124,7 @@ const AdminDashboard = () => {
     setLoadingReports(true);
     try {
       const token = localStorage.getItem("token");
-      const { data } = await axios.get("https://backend-ml27.onrender.com/api/complaints/admin/all", {
+      const { data } = await axios.get("https://online-backend-8khb.onrender.com/api/complaints/admin/all", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setReports(Array.isArray(data) ? data : []);
@@ -178,7 +178,7 @@ const AdminDashboard = () => {
     if (!inviteForm.name || !inviteForm.email || !inviteForm.department) return alert("Fill all fields");
     try {
       const token = localStorage.getItem("token");
-      await axios.post("https://backend-ml27.onrender.com/api/admin/employees", inviteForm, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post("https://online-backend-8khb.onrender.com/api/admin/employees", inviteForm, { headers: { Authorization: `Bearer ${token}` } });
       setInviteForm({ name: "", email: "", department: "" });
       fetchData();
       alert("Invite Sent Successfully");
@@ -188,7 +188,7 @@ const AdminDashboard = () => {
   const handleResendInvite = async (employeeId) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post(`https://backend-ml27.onrender.com/api/admin/employees/${employeeId}/resend`, {}, { 
+      await axios.post(`https://online-backend-8khb.onrender.com/api/admin/employees/${employeeId}/resend`, {}, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
       alert("Invitation resent successfully!");
@@ -199,7 +199,7 @@ const AdminDashboard = () => {
     if (!window.confirm("Delete this record permanently?")) return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`https://backend-ml27.onrender.com/api/complaints/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`https://online-backend-8khb.onrender.com/api/complaints/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       fetchData();
       if (activeSection === "reports") fetchReports();
     } catch (err) { alert("Delete failed."); }
@@ -208,7 +208,7 @@ const AdminDashboard = () => {
   const assignComplaint = async (complaintId, employeeId) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post(`https://backend-ml27.onrender.com/api/complaints/${complaintId}/assign`, { employeeId }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post(`https://online-backend-8khb.onrender.com/api/complaints/${complaintId}/assign`, { employeeId }, { headers: { Authorization: `Bearer ${token}` } });
       fetchData();
     } catch (err) { alert("Assignment failed."); }
   };
