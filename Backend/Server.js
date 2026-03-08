@@ -37,8 +37,8 @@ app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
 
 // 5. TEST ROUTE
-app.get("/test", (req, res) => {
-  res.send("Server is alive and reaching this point!");
+app.get("https://online-backend-8khb.onrender.com", (req, res) => {
+  res.send("Online Complaints Backend Running");
 });
 
 // 6. ROUTES (MUST BE AFTER CORS)
