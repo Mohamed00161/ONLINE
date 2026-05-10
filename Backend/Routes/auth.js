@@ -1,6 +1,6 @@
 import express from "express";
 import { signup, login, forgetPassword, Resetpassword } from "../controllers/usercontroller.js";
-import protect from "../middleware/authmiddleware.js";
+import {protect, authorize}   from "../middleware/authmiddleware.js"
 import jwt from "jsonwebtoken";
 import passport from 'passport';
 import { registerEmployee } from "../controllers/admin.js";

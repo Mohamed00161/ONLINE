@@ -16,7 +16,7 @@ const ForgotPassword = () => {
     setStatus({ type: "", msg: "" });
 
     try {
-      const res = await axios.post("https://online-backend-8khb.onrender.com/api/auth/forgetpassword", { email });
+      const res = await axios.post("http://localhost:5000/api/auth/forgetPassword", { email });
       setStatus({ 
         type: "success", 
         msg: "Recovery link sent! Please check your inbox (and spam folder)." 

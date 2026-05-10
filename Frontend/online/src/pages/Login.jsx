@@ -16,30 +16,33 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Handle Google Auth Redirect Logic
-  useEffect(() => {
-    const token = searchParams.get("token");
-    const userRaw = searchParams.get("user");
+useEffect(() => {
+  const token = searchParams.get("token");
+  const userRaw = searchParams.get("user");
 
-    if (token && userRaw) {
-      try {
-        const userInfo = JSON.parse(decodeURIComponent(userRaw));
-        localStorage.setItem("token", token);
-        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+  if (token && userRaw) {
+    try {
+      const userInfo = JSON.parse(decodeURIComponent(userRaw));
+      localStorage.setItem("token", token);
+      localStorage.setItem("userInfo", JSON.stringify(userInfo));
 
-        const userRole = userInfo.role ? userInfo.role.toLowerCase() : "user";
-        if (userRole === "admin") {
-          navigate("/admin");
-        } else if (userRole === "employee") {
-          navigate("/employee");
-        } else {
-          navigate("/dashboard");
-        }
-      } catch (error) {
-        console.error("Google Auth Parsing Error:", error);
-        setMessage("Failed to sync Google account details.");
+      const userRole = userInfo.role ? userInfo.role.toLowerCase() : "user";
+      
+      // ✅ ADD MANAGER CHECK HERE TOO
+      if (userRole === "admin") {
+        navigate("/admin");
+      } else if (userRole === "manager") {
+        navigate("/DeptManagerDashboard"); 
+      } else if (userRole === "employee") {
+        navigate("/employee");
+      } else {
+        navigate("/dashboard");
       }
+    } catch (error) {
+      console.error("Google Auth Parsing Error:", error);
     }
-  }, [searchParams, navigate]);
+  }
+}, [searchParams, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -47,45 +50,52 @@ const Login = () => {
 
   const handleGoogleLogin = () => {
     // DIRECT URL for Google Login
-    window.location.href = "https://online-backend-8khb.onrender.com/api/auth/google";
+    window.location.href = "http://localhost:5000/api/auth/google";
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage("");
 
-    try {
-      const res = await axios.post("https://online-backend-8khb.onrender.com/api/auth/login", formData);
-      
-      const { token, role, name, avatar, _id, email } = res.data;
-      
-      localStorage.setItem("token", token);
-      const userInfo = { _id, name, email, role, avatar };
-      localStorage.setItem("userInfo", JSON.stringify(userInfo));
+  try {
+    // 1. Make the request
+    const res = await axios.post("http://localhost:5000/api/auth/login", formData);
+    
+    // 2. Destructure from the response (Backend sends: { token, user: { ... } } or just { token, role... })
+    // Based on your controller, it's: res.data.token and res.data.user
+    const { token, user } = res.data; 
 
-      const userRole = role ? role.toLowerCase() : "user";
-      if (userRole === "admin") navigate("/admin");
-      else if (userRole === "employee") navigate("/employee");
-      else navigate("/dashboard");
-
-} catch (err) {
-      console.error("Login Error:", err);
-      
-      // Better error handling to see if it's a 404 or a 500
-      if (err.response) {
-        // The server responded with a status code outside the 2xx range
-        setMessage(err.response.data?.message || `Server Error: ${err.response.status}`);
-      } else if (err.request) {
-        // The request was made but no response was received
-        setMessage("No response from server. Check your internet or backend status.");
-      } else {
-        setMessage("Error setting up request.");
-      }
-    } finally {
-      setLoading(false);
+    if (!token) {
+      throw new Error("No token received from server");
     }
-  };
+
+    // 3. Save to LocalStorage
+    localStorage.setItem("token", token);
+    localStorage.setItem("userInfo", JSON.stringify(user));
+
+    // 4. Redirect Logic using the user object from the response
+    const userRole = user.role ? user.role.toLowerCase() : "user";
+    
+    console.log("Login Success! Redirecting role:", userRole);
+
+    if (userRole === "admin") {
+      navigate("/admin");
+    } else if (userRole === "manager" || userRole === "deptmanager") {
+      navigate("/DeptManagerDashboard"); 
+    } else if (userRole === "employee") {
+      navigate("/employee");
+    } else {
+      navigate("/dashboard");
+    }
+
+  } catch (err) {
+    const errorMsg = err.response?.data?.message || "Login failed. Please try again.";
+    setMessage(errorMsg); // Show this in your UI
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300">

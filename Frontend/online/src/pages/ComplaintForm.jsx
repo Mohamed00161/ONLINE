@@ -18,7 +18,7 @@ const SubmitComplaint = ({ fetchComplaints }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://online-backend-8khb.onrender.com/api/complaints", {
+      const response = await fetch("http://localhost:5000/api/complaints/new", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -33,7 +33,6 @@ const SubmitComplaint = ({ fetchComplaints }) => {
       if (fetchComplaints) fetchComplaints(); 
       alert("Complaint filed successfully!");
     } catch (err) {
-      console.error(err);
       alert("Failed to submit. Please check your connection.");
     } finally {
       setLoading(false);

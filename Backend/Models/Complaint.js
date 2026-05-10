@@ -7,24 +7,47 @@ const complaintSchema = new mongoose.Schema(
     description: { type: String, required: true },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // The person who filed the complaint
+      ref: "User", 
       required: true,
     },
-    // ✅ ADDED THIS FIELD:
+    
+    // 1. WHICH DEPARTMENT OWNS THIS? (Water, Electricity, etc.)
+assignedDepartment: {
+  type: String,
+  enum: ["Water", "Electricity", "Infrastructure", "Health", "Waste", "None"], // Added Waste
+  default: "None",
+},
+
+    // 2. WHICH EMPLOYEE IS DOING THE WORK?
     assignedEmployee: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Refers to the Employee user
+      ref: "User", 
       default: null,
     },
+
+    // 3. UPDATED STATUSES FOR BETTER TRACKING
     status: {
       type: String,
-      enum: ["Pending", "In Progress", "Resolved"],
+      enum: ["Pending", "Assigned to Dept", "In Progress", "Completed", "Resolved"],
       default: "Pending",
     },
-    // ✅ OPTIONAL: Add a field for employee remarks
+
+    // 4. PROOF OF WORK (The image the employee takes)
+    resolutionImage: {
+      type: String, // URL of the image (Cloudinary or local path)
+      default: "",
+    },
+
+    // 5. REMARKS FROM THE EMPLOYEE
     resolutionNotes: {
       type: String,
       default: "",
+    },
+
+    // 6. DATE TRACKING
+    completedAt: {
+      type: Date,
+      default: null
     }
   },
   { timestamps: true }

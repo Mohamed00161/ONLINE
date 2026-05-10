@@ -21,7 +21,7 @@ const ResetPassword = () => {
     setLoading(true);
     try {
       const res = await axios.post(
-        `https://online-backend-8khb.onrender.com/api/auth/Resetpassword/${token}`,
+        `http://localhost:5000/api/auth/Resetpassword/${token}`,
         { password }
       );
       

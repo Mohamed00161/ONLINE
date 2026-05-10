@@ -1,34 +1,47 @@
 import express from "express";
-import { getComplaint, submitReport, createComplaint, getAllComplaint, updateComplaintStatus, deleteComplaint, getAssignedComplaints ,assignComplaint, resolveComplaint, GetReport } from "../controllers/complaint.js"
-import protect from "../middleware/authmiddleware.js";
-
+import { 
+  getComplaint, 
+  submitReport, 
+  createComplaint, 
+  getAllComplaint, 
+  deleteComplaint, 
+  getAssignedComplaints,
+  assignToDepartment,    // Updated: Admin to Dept
+  getDeptComplaints,     // New: Dept Manager view
+  assignToEmployee,      // Updated: Dept to Employee
+  resolveComplaint,      // Updated: Employee finishes
+  finalCloseComplaint,   // New: Final verification
+  GetReport, 
+  
+  
+} from "../controllers/complaint.js"
+import {protect, authorize}   from "../middleware/authmiddleware.js"
 
 const router = express.Router();
 
-// Submit complaint (protected)
-router.post("/", protect,  createComplaint);
-router.get("/my",  protect, getComplaint);
+// --- USER ROUTES ---
+router.post("/new", protect, createComplaint);         // File a new complaint
+router.get("/my", protect, getComplaint);           // View my own history
 
-// Get complaints (protected or admin-only later)
-router.get("/",protect, getAllComplaint)
+// --- SUPER ADMIN ROUTES ---
+router.get("/all", protect, getAllComplaint);      // See everything in the system
 
-router.put("/:id/status", protect, updateComplaintStatus);
+router.put('/:id/assign-dept', protect, assignToDepartment);
 
-router.delete("/:id", protect, deleteComplaint);
+router.delete("/:id", protect, deleteComplaint);    // Remove a complaint
 
-// router.get("/assigned", protect, assignComplaint);
 
-// 1. Route for Employee to fetch THEIR tasks
-router.get("/assigned", protect, getAssignedComplaints);
+router.put("/:id/assign-worker", protect, assignToEmployee);
 
-// 2. Route for Admin to assign A task (POST matches your AdminDashboard call)
-router.post("/:id/assign", protect, assignComplaint);
+// --- EMPLOYEE ROUTES ---
+router.get("/assigned", protect, getAssignedComplaints); // View my daily tasks
+router.put("/:id/resolve", protect, resolveComplaint);   // Upload photo & notes
 
-router.put("/:id/resolve", protect, resolveComplaint);
- 
+// --- FINAL VERIFICATION ---
+router.put("/:id/close", protect, finalCloseComplaint);  // Mark as fully resolved
+
+// --- REPORTS ---
 router.post("/submit", protect, submitReport);
-
-router.get("/admin/all", protect ,GetReport)
-
+router.get("/Report", protect, GetReport);
 
 export default router;

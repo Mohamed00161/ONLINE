@@ -1,168 +1,206 @@
 import Complaint from "../Models/Complaint.js";
-import User from "../Models/User.js"; // Ensure User is imported for the login function
-import mongoose from "mongoose";
+import User from "../Models/User.js";
 import Report from "../Models/Report.js";
 
 // ✅ 1. USER: CREATE COMPLAINT
 export const createComplaint = async (req, res) => {
   try {
     const { title, category, description } = req.body;
-
     const complaint = await Complaint.create({
       title,
       category,
       description,
-      status: "Pending", // Default status
-      user: req.user._id, // The person who filed it
+      user: req.user._id,
+      status: "Pending",
     });
-
     res.status(201).json(complaint);
   } catch (err) {
     res.status(500).json({ message: "Failed to create complaint" });
   }
 };
 
-// ✅ 2. USER: GET OWN COMPLAINTS
-export const getComplaint = async (req, res) => {
+// ✅ 2. SUPER ADMIN: ASSIGN TO A DEPARTMENT
+export const assignToDepartment = async (req, res) => {
   try {
-    // Standardize: Users look for complaints where 'user' matches their ID
-    const complaints = await Complaint.find({ user: req.user._id }).sort({ createdAt: -1 });
-    res.json(complaints);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching complaints" });
+    const { id } = req.params;
+    const { department } = req.body; // The value from your Admin dropdown (e.g., "Electricity")
+
+    const updated = await Complaint.findByIdAndUpdate(
+      id,
+      { 
+        // FIX: Change 'department' to 'assignedDepartment'
+        assignedDepartment: department, 
+        status: "Assigned to Dept" 
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Complaint not found" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Admin Routing Error:", err);
+    res.status(500).json({ message: "Routing failed", error: err.message });
   }
 };
 
-// ✅ 3. ADMIN: GET ALL COMPLAINTS
-export const getAllComplaint = async (req, res) => {
+
+// ✅ 3. DEPT MANAGER: GET COMPLAINTS FOR THEIR DEPT
+export const getDeptComplaints = async (req, res) => {
   try {
-    const complaints = await Complaint.find()
-      .populate("user", "name email")
-      .populate("assignedEmployee", "name email"); // Also see who is working on it
+    const { department } = req.user; 
+    const complaints = await Complaint.find({ assignedDepartment: department })
+      .populate("user", "name")
+      .sort({ createdAt: -1 });
     res.json(complaints);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching all complaints" });
+    res.status(500).json({ message: "Error fetching department complaints" });
   }
 };
 
-// ✅ 4. ADMIN: ASSIGN COMPLAINT
-export const assignComplaint = async (req, res) => {
+// ✅ 4. DEPT MANAGER: ASSIGN TO SPECIFIC EMPLOYEE
+export const assignToEmployee = async (req, res) => {
   try {
     const { id } = req.params; 
     const { employeeId } = req.body;
 
+    // 1. Logic Check: Find and update
     const updated = await Complaint.findByIdAndUpdate(
       id,
-      { assignedEmployee: employeeId, status: "In Progress" },
-      { new: true }
+      { 
+        assignedEmployee: employeeId, 
+        status: "In Progress" 
+      },
+      { new: true, runValidators: true }
     );
+
+    // 2. Explicit 404 Check
+    if (!updated) {
+      return res.status(404).json({ message: "Complaint ID not found in database." });
+    }
+
     res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: "Assignment failed" });
+    console.error("Assignment Error:", err);
+    res.status(500).json({ message: "Employee assignment failed due to server error." });
   }
 };
 
-// ✅ 5. EMPLOYEE: GET ASSIGNED COMPLAINTS (The Fix for your Mismatch)
+// ✅ 5. EMPLOYEE: SUBMIT WORK PROOF
+// Backend snippet example
+export const resolveComplaint = async (req, res) => {
+  const { resolutionNotes, status } = req.body;
+  const complaint = await Complaint.findByIdAndUpdate(
+    req.params.id, 
+    { resolutionNotes, status, updatedAt: Date.now() }, 
+    { new: true }
+  );
+  res.json(complaint);
+};
+
+// ✅ 6. ADMIN/USER: FINAL RESOLUTION
+export const finalCloseComplaint = async (req, res) => {
+    try {
+      const updated = await Complaint.findByIdAndUpdate(
+        req.params.id,
+        { status: "Resolved" },
+        { new: true }
+      );
+      res.json(updated);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+// ✅ 7. EMPLOYEE: GET THEIR SPECIFIC ASSIGNED TASKS
 export const getAssignedComplaints = async (req, res) => {
   try {
-    // We convert to string to ensure clean matching
-    const employeeId = req.user._id.toString();
-
     const complaints = await Complaint.find({ 
-      assignedEmployee: employeeId 
+      assignedEmployee: req.user._id 
     }).sort({ createdAt: -1 });
-
     res.json(complaints);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Error fetching assigned tasks" });
   }
 };
 
-// ✅ 6. UPDATE STATUS (Used by Admin or Employee)
-// Example Backend Controller (Node/Express)
- export const updateComplaintStatus = async (req, res) => {
-  try {
-    const { status, resolutionNote } = req.body; // Capture the note
-    
-    // Find the complaint
-    const complaint = await Complaint.findById(req.params.id);
-
-    if (complaint) {
-      complaint.status = status;
-      
-      // If a note was sent, save it (ensure your DB model has this field)
-      if (resolutionNote) {
-        complaint.resolutionNote = resolutionNote; 
-        complaint.resolvedAt = Date.now();
-      }
-
-      const updatedComplaint = await complaint.save();
-      res.json(updatedComplaint);
-    } 
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// ✅ 7. DELETE COMPLAINT
+// ✅ 8. UTILITY: DELETE COMPLAINT
 export const deleteComplaint = async (req, res) => {
   try {
-    const { id } = req.params;
-    const complaint = await Complaint.findByIdAndDelete(id);
-    if (!complaint) return res.status(404).json({ message: "Complaint not found" });
-
-    res.json({ message: "Complaint deleted successfully", _id: id });
+    await Complaint.findByIdAndDelete(req.params.id);
+    res.json({ message: "Complaint deleted" });
   } catch (err) {
     res.status(500).json({ message: "Delete failed" });
   }
 };
 
-
-// Check your backend/controllers/complaintController.js
-export const resolveComplaint = async (req, res) => {
-  try {
-    const { resolutionNote } = req.body; // <-- Is this being received?
-    
-    const updated = await Complaint.findByIdAndUpdate(
-      req.params.id,
-      { 
-        status: "Resolved", 
-        resolutionNote, // <-- This MUST be saved here
-        resolvedAt: new Date() 
-      },
-      { new: true }
-    );
-    res.json(updated);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-};
-
-
-
-// POST: Staff submitting a report
+// ✅ 9. REPORTS: SUBMIT AND GET (Fixing your SyntaxError)
 export const submitReport = async (req, res) => {
   try {
     const { title, description } = req.body;
-
-    // Validation check
-    if (!title || !description) {
-      return res.status(400).json({ message: "Title and description are required" });
-    }
-
     const report = await Report.create({
-      staffId: req.user._id, // Ensure "protect" middleware provides req.user
+      staffId: req.user._id,
       title,
       description,
     });
-
     res.status(201).json(report);
   } catch (error) {
-    console.error("Error in submitReport:", error); // Check your terminal for this log!
-    res.status(500).json({ message: "Server Error: Could not save report" });
+    res.status(500).json({ message: "Could not save report" });
   }
 };
 
-// GET: Admin fetching all reports
 export const GetReport = async (req, res) => {
-  const reports = await Report.find().populate("staffId", "name email");
-  res.json(reports);
+  try {
+    const reports = await Report.find().populate("staffId", "name email");
+    res.json(reports);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching reports" });
+  }
 };
+
+
+export const getComplaint = async (req, res) => {
+  try {
+    let query = {};
+
+    if (req.user.role === 'manager' || req.user.role === 'deptmanager') {
+      const managerDept = req.user.department?.trim();
+      if (!managerDept || managerDept === "None") return res.json([]);
+
+      query = { 
+        assignedDepartment: { $regex: new RegExp(`^${managerDept}$`, 'i') } 
+      };
+    } 
+    else if (req.user.role === 'admin') {
+      query = {}; 
+    } 
+    else {
+      query = { user: req.user._id };
+    }
+
+    const complaints = await Complaint.find(query)
+      .sort({ createdAt: -1 })
+      .populate('user', 'name email')
+      .populate('assignedEmployee', 'name email');
+
+    // Comment these out if you want a clean terminal
+    // console.log(`RESULT: Found ${complaints.length} complaints.`);
+
+    res.json(complaints);
+  } catch (error) {
+    console.error("FETCH ERROR:", error.message);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const getAllComplaint = async (req, res) => {
+  try {
+    const complaints = await Complaint.find()
+      .populate("user", "name email")
+      .populate("assignedEmployee", "name email");
+    res.json(complaints);
+  } catch (err) { res.status(500).json({ message: "Error fetching all" }); }
+};
+
+
+

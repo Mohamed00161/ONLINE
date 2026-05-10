@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Profile from "./pages/Profile";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import EmployeeRegister from "./pages/EmployeeRegister";
+import DeptManagerDashboard from "./pages/DeptManagerDashboard";
 
 // 1. Import the ThemeProvider
 import { ThemeProvider } from "./context/ThemeContext";
@@ -38,6 +39,7 @@ function App() {
         <Route path="/user/submit" element={<ComplaintForm />} />
         <Route path="/user/complaints" element={<MyComplaints />} />
         <Route path="/pages/AdminDashboard" element={<ManageComplaints />} />
+        <Route path="/DeptManagerDashboard" element={<DeptManagerDashboard/>}/>
       </Routes>
     </ThemeProvider>
   );

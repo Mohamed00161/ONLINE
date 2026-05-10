@@ -2,32 +2,33 @@ import User from "../Models/User.js";
 import cloudinary from "../config/claudinary.js"
 
 // ✅ GET PROFILE
+// ✅ GET PROFILE
 export const getProfile = async (req, res) => {
   try {
-    // 1. Find user and exclude password
+    // Check if req.user exists first to avoid the 'null' error
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Not authorized: User context missing" });
+    }
+
     const user = await User.findById(req.user._id).select("-password");
     
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found in database" });
     }
-
-    // 2. Build the avatar URL
-    // If user.avatar is stored in DB as a full Cloudinary URL, use it.
-    // If it's just a public_id, you'd need to format it, but usually, 
-    // it's best to store the full URL.
-    const profileAvatar = user.avatar ? user.avatar : null;
 
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      avatar: profileAvatar, 
+      department: user.department, 
+      category: user.category,     
+      avatar: user.avatar || null, 
       joined: user.createdAt,
     });
   } catch (error) {
     console.error("Profile Fetch Error:", error);
-    res.status(500).json({ message: "Error fetching profile from database" });
+    res.status(500).json({ message: "Error fetching profile" });
   }
 };
 

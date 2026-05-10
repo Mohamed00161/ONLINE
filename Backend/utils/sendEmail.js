@@ -1,36 +1,35 @@
-import { Resend } from 'resend';
+import nodemailer from "nodemailer";
 
-// REMOVE the top-level initialization: const resend = new Resend(...)
+const sendEmail = async (options) => {
+  const transporter = nodemailer.createTransport({
+    host: "sandbox.smtp.mailtrap.io",
+    port: 2525,
+    auth: {
+      // These must match the names in your .env exactly
+      user: process.env.EMAIL_USER, 
+      pass: process.env.EMAIL_PASS, 
+    },
+  });
 
-const sendEmail = async ({ to, subject, html }) => {
-  // Initialize INSIDE the function so it catches the API key after dotenv loads
-  const apiKey = process.env.EMAIL_API_KEY;
-  
-  if (!apiKey) {
-    console.error("❌ CRITICAL ERROR: EMAIL_API_KEY is undefined in process.env");
-    throw new Error("Missing API key for Resend");
+  const recipient = options.to || options.email;
+
+  if (!recipient) {
+    throw new Error("Nodemailer Error: No recipient address provided.");
   }
 
-  const resend = new Resend(apiKey);
+  const mailOptions = {
+    from: '"FixIt Pro Admin" <admin@fixitpro.com>',
+    to: recipient,
+    subject: options.subject,
+    html: options.html || options.message, 
+  };
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'FixIt <onboarding@resend.dev>', // Must use this on free tier
-      to: to,
-      subject: subject,
-      html: html,
-    });
-
-    if (error) {
-      console.error("Resend API Error:", error.message);
-      throw new Error(error.message);
-    }
-
-    console.log("✅ Email sent successfully ID:", data.id);
-    return data;
-  } catch (err) {
-    console.error("Email processing failed:", err.message);
-    throw err;
+    await transporter.sendMail(mailOptions);
+    console.log(`Email successfully sent to: ${recipient}`);
+  } catch (error) {
+    console.error("Nodemailer error:", error);
+    throw error;
   }
 };
 

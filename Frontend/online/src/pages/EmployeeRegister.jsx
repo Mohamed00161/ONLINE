@@ -10,14 +10,15 @@ const EmployeeRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+ const submitHandler = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  const cleanToken = token.split(':')[0].trim();
 
-    try {
-      await axios.post(`https://online-backend-8khb.onrender.com/api/admin/employee/register/${token}`, {
-        password,
-      });
+  try {
+    await axios.post(`http://localhost:5000/api/admin/employee/register/${cleanToken}`, {
+      password,
+    });
 
       alert("Account created successfully! You can now log in.");
       navigate("/login");
