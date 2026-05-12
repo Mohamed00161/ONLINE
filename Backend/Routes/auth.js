@@ -30,25 +30,22 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "https://online-complaints-nu.vercel.app/login",
+    failureRedirect: "http://localhost:5000/login",
   }),
   (req, res) => {
     const token = generateToken(req.user._id);
 
-    const userData = encodeURIComponent(
-      JSON.stringify({
-        _id: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-        role: req.user.role || "user",
-        avatar: req.user.avatar,
-      })
-    );
+  const userData = encodeURIComponent(
+  JSON.stringify({
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+    avatar: req.user.avatar,
+  })
+);
 
     // Redirect back to frontend with token + user data
-    res.redirect(
-      `https://online-complaints-nu.vercel.app/google-success?token=${token}&user=${userData}`
-    );
+   res.redirect(`http://localhost:5173/google-success?token=${token}&user=${userData}`);
   }
 );
 

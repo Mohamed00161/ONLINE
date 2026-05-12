@@ -16,10 +16,10 @@ const Signup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleGoogleSignup = () => {
-    // Direct URL for Google Auth
-    window.location.href = "https://localhost:5000/api/auth/google";
-  };
+const handleGoogleSignup = () => {
+  // Use http instead of https for local development
+  window.location.href = "http://localhost:5000/api/auth/google";
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

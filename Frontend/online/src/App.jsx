@@ -14,6 +14,10 @@ import Profile from "./pages/Profile";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import EmployeeRegister from "./pages/EmployeeRegister";
 import DeptManagerDashboard from "./pages/DeptManagerDashboard";
+// App.jsx
+import GoogleSuccess from "./compont/GoogleSuccess"
+
+
 
 // 1. Import the ThemeProvider
 import { ThemeProvider } from "./context/ThemeContext";
@@ -35,6 +39,7 @@ function App() {
         <Route path="/ManageComplaints" element={<ManageComplaints />} />
         <Route path="/employee" element={<EmployeeDashboard />} />
         <Route path="/employee/register/:token" element={<EmployeeRegister />} />
+        <Route path="/google-success" element={<GoogleSuccess />} />
 
         <Route path="/user/submit" element={<ComplaintForm />} />
         <Route path="/user/complaints" element={<MyComplaints />} />
