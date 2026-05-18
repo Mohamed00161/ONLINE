@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import API from  "../Api.js"
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { FaSignInAlt, FaShieldAlt, FaEye, FaEyeSlash, FaArrowLeft } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -44,15 +44,17 @@ useEffect(() => {
   }
 }, [searchParams, navigate]);
 
-  const handleChange = (e) => {
+ const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleGoogleLogin = () => {
-    // DIRECT URL for Google Login
-    window.location.href = "http://localhost:5000/api/auth/google";
+    // Dynamically choose Render if live, or localhost if testing locally
+    const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    
+    // Redirect the user to the correct backend endpoint
+    window.location.href = `${BACKEND_URL}/api/auth/google`;
   };
-
 const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
@@ -60,7 +62,7 @@ const handleSubmit = async (e) => {
 
   try {
     // 1. Make the request
-    const res = await axios.post("http://localhost:5000/api/auth/login", formData);
+  const res = await API.post("/api/auth/login", formData);
     
     // 2. Destructure from the response (Backend sends: { token, user: { ... } } or just { token, role... })
     // Based on your controller, it's: res.data.token and res.data.user
