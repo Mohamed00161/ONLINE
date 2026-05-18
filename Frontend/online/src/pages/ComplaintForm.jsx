@@ -21,17 +21,33 @@ const handleSubmit = async (e) => {
     const token = localStorage.getItem("token");
     
     // 1. Get the dynamic backend URL (or hardcode your Render link directly)
-    const BACKEND_URL = import.meta.env.VITE_API_URL || "https://online-wcx5.onrender.com";
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  
+  try {
+    const token = localStorage.getItem("token");
 
-    // 2. Use the dynamic BACKEND_URL variable in the fetch path
-    const response = await fetch(`${BACKEND_URL}/api/complaints/new`, {
-      method: "POST",
+    // Swapped the native fetch() block for your central API instance
+    const res = await API.post("/api/complaints/new", form, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        // Note: 'Content-Type': 'application/json' is handled automatically by Axios/API instance
       },
-      body: JSON.stringify(form),
     });
+
+    // Axios stores the response body in 'res.data' instead of requiring 'await response.json()'
+    showToast("Complaint submitted successfully!", "success");
+    
+    // Clear your form or navigate the user here...
+
+  } catch (err) {
+    console.error("Submission error:", err);
+    showToast(err.response?.data?.message || "Failed to submit complaint", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
     // Your existing code to handle the response goes here...
 
