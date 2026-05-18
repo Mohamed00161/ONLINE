@@ -18,6 +18,7 @@ export const getComplaints = async (req, res) => {
 /* ================= INVITE EMPLOYEE ================= */
 // controllers/admin.js
 
+
 export const inviteDeptManager = async (req, res) => {
   try {
     const { name, email, department } = req.body;
@@ -33,7 +34,6 @@ export const inviteDeptManager = async (req, res) => {
     }
 
     // 2. Generate a Secure Token
-    // We use a random hex string instead of Base64 email for better security
     const token = crypto.randomBytes(32).toString('hex');
 
     // 3. Create the placeholder Manager in the Database
@@ -43,12 +43,13 @@ export const inviteDeptManager = async (req, res) => {
       department,
       role: "manager", 
       isActive: false,
-      setupToken: token, // ✅ SAVED: Now the backend can find this later
+      setupToken: token, 
       inviteExpires: Date.now() + 24 * 60 * 60 * 1000 // Expires in 24 hours
     });
 
-    // 4. Define setupUrl
-    const setupUrl = `http://localhost:5173/employee/register/${token}`;
+    // 4. Define setupUrl using Environment Variables for Production/Development
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const setupUrl = `${frontendUrl}/employee/register/${token}`;
 
     // 5. Enhanced HTML Message
     const message = `
@@ -117,8 +118,9 @@ export const inviteEmployee = async (req, res) => {
       setupToken: setupToken // Save this so we can verify the link later
     });
 
-    // 4. The URL points to the secure hex token
-    const setupUrl = `http://localhost:5173/employee/register/${setupToken}`;
+    // 4. Define setupUrl using Environment Variables for Production/Development
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const setupUrl = `${frontendUrl}/employee/register/${setupToken}`;
 
     const emailDeptName = department !== "None" ? department : "our Maintenance Team";
 
@@ -188,15 +190,16 @@ export const resendInvite = async (req, res) => {
 
     await employee.save();
 
-    // 6. Link Construction
+    // 6. Link Construction using Environment Variables
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const rolePath = employee.role === 'manager' ? 'manager' : 'employee';
-    const inviteLink = `http://localhost:5173/${rolePath}/register/${newInviteToken}`;
+    const inviteLink = `${frontendUrl}/${rolePath}/register/${newInviteToken}`;
 
     // 7. Dispatch Email with Styled Button
     await sendEmail({
-      to: employee.email,
+      email: employee.email, // Updated 'to' to 'email' to match your updated sendEmail utility
       subject: "Action Required: Your Registration Link is Ready",
-      html: `
+      message: `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #333; line-height: 1.6;">
           <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 10px;">Welcome to the Team!</h1>
@@ -230,7 +233,7 @@ export const resendInvite = async (req, res) => {
   } catch (err) {
     console.error("Resend Error:", err);
     
-    // Check if error is Mailtrap/Nodemailer rate limiting
+    // Check if error is SMTP provider rate limiting
     if (err.responseCode === 550) {
       return res.status(429).json({ 
         message: "Email provider busy. Link updated in DB, but email failed to send. Please try again in 1 minute." 

@@ -1,36 +1,27 @@
 import nodemailer from "nodemailer";
 
 const sendEmail = async (options) => {
+  // 1. Create a transporter
   const transporter = nodemailer.createTransport({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 2525,
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT) || 465,
+    secure: true, // true for port 465, false for other ports
     auth: {
-      // These must match the names in your .env exactly
-      user: process.env.EMAIL_USER, 
-      pass: process.env.EMAIL_PASS, 
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
     },
   });
 
-  const recipient = options.to || options.email;
-
-  if (!recipient) {
-    throw new Error("Nodemailer Error: No recipient address provided.");
-  }
-
+  // 2. Define email options
   const mailOptions = {
-    from: '"FixIt Pro Admin" <admin@fixitpro.com>',
-    to: recipient,
+    from: `"FixIt HQ Support" <${process.env.EMAIL_USER}>`,
+    to: options.email,
     subject: options.subject,
-    html: options.html || options.message, 
+    html: options.message, // Use 'html' instead of 'text' for your rich styling templates
   };
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`Email successfully sent to: ${recipient}`);
-  } catch (error) {
-    console.error("Nodemailer error:", error);
-    throw error;
-  }
+  // 3. Send the email
+  await transporter.sendMail(mailOptions);
 };
 
 export default sendEmail;

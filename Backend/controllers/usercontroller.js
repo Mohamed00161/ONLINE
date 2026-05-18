@@ -122,26 +122,30 @@ export const forgetPassword = async (req, res) => {
       { expiresIn: "10m" }
     );
 
-    // 3. Construct the Reset Link
-   const resetLink = `${process.env.FRONTEND_URL}/Resetpassword/${resetToken}`;
+    // 3. Construct the Reset Link dynamically using Environment Variables
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetLink = `${frontendUrl}/Resetpassword/${resetToken}`;
 
-    // 4. Send Email using your sendEmail utility (Mailtrap)
+    // 4. Send Email using your updated sendEmail utility
     await sendEmail({
-      to: email,
+      email: email, // Updated 'to' to 'email' to match your utility template
       subject: "Password Reset Request",
-      html: `
+      message: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
           <h2 style="color: #4f46e5;">Password Reset</h2>
           <p>You requested to reset your password. Click the button below to proceed:</p>
-          <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+              Reset Password
+            </a>
+          </div>
           <p style="margin-top: 20px; font-size: 0.8rem; color: #666;">This link will expire in 10 minutes. If you did not request this, please ignore this email.</p>
         </div>
-      `
+      ` // Updated 'html' to 'message' to match your utility template
     });
 
-    res.status(200).json({ message: "Reset email sent to Mailtrap!" });
+    res.status(200).json({ message: "Password reset email sent successfully!" });
   } catch (error) {
-    // This prints the actual error to your VS Code terminal
     console.error("Forget Password Error:", error.message);
     res.status(500).json({ message: error.message || "Internal server error" });
   }
