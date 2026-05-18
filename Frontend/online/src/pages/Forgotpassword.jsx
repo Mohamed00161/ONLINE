@@ -9,28 +9,27 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState({ type: "", msg: "" });
   const [loading, setLoading] = useState(false);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setStatus({ type: "", msg: "" });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setStatus({ type: "", msg: "" });
-
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgetPassword", { email });
-      setStatus({ 
-        type: "success", 
-        msg: "Recovery link sent! Please check your inbox (and spam folder)." 
-      });
-    } catch (err) {
-      setStatus({ 
-        type: "error", 
-        msg: err.response?.data?.message || "Something went wrong. Please try again." 
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  try {
+    // Swapped axios.post for API.post and removed the hardcoded localhost prefix
+    const res = await API.post("/api/auth/forgetPassword", { email });
+    setStatus({ 
+      type: "success", 
+      msg: "Recovery link sent! Please check your inbox (and spam folder)." 
+    });
+  } catch (err) {
+    setStatus({ 
+      type: "error", 
+      msg: err.response?.data?.message || "Something went wrong. Please try again." 
+    });
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300">
       

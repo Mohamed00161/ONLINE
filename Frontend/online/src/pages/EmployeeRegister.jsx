@@ -10,24 +10,25 @@ const EmployeeRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
- const submitHandler = async (e) => {
+const submitHandler = async (e) => {
   e.preventDefault();
   setLoading(true);
   const cleanToken = token.split(':')[0].trim();
 
   try {
-    await axios.post(`http://localhost:5000/api/admin/employee/register/${cleanToken}`, {
+    // Swapped axios.post for API.post and removed the hardcoded localhost prefix
+    await API.post(`/api/admin/employee/register/${cleanToken}`, {
       password,
     });
 
-      alert("Account created successfully! You can now log in.");
-      navigate("/login");
-    } catch (err) {
-      alert(err.response?.data?.message || "This invitation link is invalid or has expired.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    alert("Account created successfully! You can now log in.");
+    navigate("/login");
+  } catch (err) {
+    alert(err.response?.data?.message || "This invitation link is invalid or has expired.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 font-sans">

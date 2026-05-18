@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import axios from "axios";
+import API from  "../Api.js"
 import { useTheme } from "../context/ThemeContext.jsx";
 import { useNavigate } from "react-router-dom";
 import {
@@ -102,25 +102,28 @@ const toggleRow = (id) => {
 };
 
   // --- Data Fetching ---
-  const fetchGlobalData = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const [complaintsRes, reportsRes, managersRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/complaints/all", config),
-        axios.get("http://localhost:5000/api/complaints/Report", config),
-        axios.get("http://localhost:5000/api/admin/managers", config)
-      ]);
-      setComplaints(complaintsRes.data || []);
-      setReports(reportsRes.data || []);
-      setManagers(managersRes.data || []);
-    } catch (err) {
-      showToast("Failed to load data", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchGlobalData = async () => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    
+    // Using API instead of axios automatically uses your Render URL on production!
+    const [complaintsRes, reportsRes, managersRes] = await Promise.all([
+      API.get("/api/complaints/all", config),
+      API.get("/api/complaints/Report", config),
+      API.get("/api/admin/managers", config)
+    ]);
+
+    // Your existing code to handle the responses goes here...
+
+  } catch (error) {
+    console.error("Error fetching global data:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+  
 
   useEffect(() => {
     fetchGlobalData();
@@ -149,7 +152,7 @@ const toggleRow = (id) => {
     setIsInviting(true);
     try {
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:5000/api/admin/invite-manager", inviteForm, {
+      const res = await API.post("/api/admin/invite-manager", inviteForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       showToast("Invitation sent successfully!");
@@ -170,8 +173,7 @@ const handleResendInvite = async (manager) => {
     const token = localStorage.getItem("token");
     
     // Updated URL to match your backend: /api/admin/employees/:id/resend
-    await axios.post(
-      `http://localhost:5000/api/admin/employees/${manager._id}/resend`, 
+    const res = await API.post("/api/admin/employees/${manager._id}/resend", 
       {}, // Empty body because we use URL params
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -188,7 +190,7 @@ const handleResendInvite = async (manager) => {
     const formattedDept = deptName.charAt(0).toUpperCase() + deptName.slice(1);
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/complaints/${complaintId}/assign-dept`,
+      const res = await API.post("/api/complaints/${complaintId}/assign-dept",
         { department: formattedDept },
         { headers: { Authorization: `Bearer ${token}` } }
       );

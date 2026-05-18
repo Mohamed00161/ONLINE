@@ -1,4 +1,5 @@
 import { useState } from "react";
+import API from  "../Api.js"
 import { FaPaperPlane, FaHeading, FaTags, FaAlignLeft } from "react-icons/fa";
 
 const SubmitComplaint = ({ fetchComplaints }) => {
@@ -13,32 +14,35 @@ const SubmitComplaint = ({ fetchComplaints }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/complaints/new", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    
+    // 1. Get the dynamic backend URL (or hardcode your Render link directly)
+    const BACKEND_URL = import.meta.env.VITE_API_URL || "https://online-backend-8khb.onrender.com";
 
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+    // 2. Use the dynamic BACKEND_URL variable in the fetch path
+    const response = await fetch(`${BACKEND_URL}/api/complaints/new`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
 
-      setForm({ title: "", category: "", description: "" });
-      if (fetchComplaints) fetchComplaints(); 
-      alert("Complaint filed successfully!");
-    } catch (err) {
-      alert("Failed to submit. Please check your connection.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Your existing code to handle the response goes here...
 
+  } catch (error) {
+    console.error("Error submitting complaint:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  
   return (
     /* We use max-w-md to keep it narrow and mx-auto to center it */
     <div className="max-w-md mx-auto bg-white p-2">

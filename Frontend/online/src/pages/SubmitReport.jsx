@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import API from "../Api";
 import { FaPaperPlane, FaFileAlt, FaExclamationTriangle } from "react-icons/fa";
 
 const SubmitReport = () => {
@@ -12,7 +12,7 @@ const SubmitReport = () => {
     try {
       const token = localStorage.getItem("token");
       // POST URL for submitting report
-      await axios.post("https://localhost:5000/api/reports/submit", reportData, {
+      await API.post("/api/reports/submit", reportData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Report submitted to Admin successfully!");

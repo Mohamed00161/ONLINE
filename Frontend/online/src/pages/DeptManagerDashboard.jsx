@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import axios from "axios";
+import API from "../Api.js";
 import { useTheme } from "../context/ThemeContext.jsx";
 import { useNavigate } from "react-router-dom";
 import {
@@ -124,40 +124,42 @@ const DeptManagerDashboard = () => {
   const showToast = (message, type = 'success') => setToast({ message, type });
 
   // Data fetching
-  const fetchProfileAndData = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-    setLoading(true);
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    try {
-      const profRes = await axios.get("http://localhost:5000/api/profile", config);
-      const userData = profRes.data.user || profRes.data;
-      setManager(userData);
+ const fetchProfileAndData = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    navigate("/login");
+    return;
+  }
+  setLoading(true);
+  const config = { headers: { Authorization: `Bearer ${token}` } };
+  try {
+    // Swapped axios for API and removed the hardcoded localhost prefix
+    const profRes = await API.get("/api/profile", config);
+    const userData = profRes.data.user || profRes.data;
+    setManager(userData);
 
-      const [compRes, teamRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/complaints/my", config),
-        axios.get("http://localhost:5000/api/admin/employees", config).catch(() => ({ data: [] }))
-      ]);
+    // Swapped axios for API on both endpoints inside the Promise.all block
+    const [compRes, teamRes] = await Promise.all([
+      API.get("/api/complaints/my", config),
+      API.get("/api/admin/employees", config).catch(() => ({ data: [] }))
+    ]);
 
-      const complaintsWithMeta = (compRes.data || []).map(c => ({
-        ...c,
-        priority: c.priority || "Medium",
-        internalNotes: c.internalNotes || []
-      }));
-      setComplaints(complaintsWithMeta);
-      const myDept = userData.department?.trim().toLowerCase();
-      const myTeam = teamRes.data.filter(emp => emp.department?.trim().toLowerCase() === myDept);
-      setTeamMembers(myTeam);
-    } catch (err) {
-      console.error("Fetch error", err);
-      showToast("Failed to load data", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const complaintsWithMeta = (compRes.data || []).map(c => ({
+      ...c,
+      priority: c.priority || "Medium",
+      internalNotes: c.internalNotes || []
+    }));
+    setComplaints(complaintsWithMeta);
+    const myDept = userData.department?.trim().toLowerCase();
+    const myTeam = teamRes.data.filter(emp => emp.department?.trim().toLowerCase() === myDept);
+    setTeamMembers(myTeam);
+  } catch (err) {
+    console.error("Fetch error", err);
+    showToast("Failed to load data", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchProfileAndData();
@@ -172,21 +174,24 @@ const DeptManagerDashboard = () => {
     };
   }, []);
 
-  // --- Complaint Management Functions ---
-  const updateComplaintField = async (complaintId, updates) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/complaints/${complaintId}`, updates, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      await fetchProfileAndData();
-      showToast("Updated successfully");
-      return true;
-    } catch (err) {
-      showToast("Update failed", "error");
-      return false;
-    }
-  };
+// 2. Here is your updated function:
+const updateComplaintField = async (complaintId, updates) => {
+  try {
+    const token = localStorage.getItem("token");
+    
+    // Swapped axios.put for API.put and removed the hardcoded localhost prefix
+    await API.put(`/api/complaints/${complaintId}`, updates, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    await fetchProfileAndData();
+    showToast("Updated successfully");
+    return true;
+  } catch (err) {
+    showToast("Update failed", "error");
+    return false;
+  }
+};
 
   const handleSetPriority = async (complaintId, priority) => {
     await updateComplaintField(complaintId, { priority });
@@ -229,52 +234,57 @@ const DeptManagerDashboard = () => {
   };
 
   const handleInviteEmployee = async (e) => {
-    e.preventDefault();
-    let dept = manager.department;
-    if (!dept || dept === "None") {
-      const savedInfo = JSON.parse(localStorage.getItem("userInfo"));
-      dept = savedInfo?.department;
-    }
-    if (!dept || dept === "None") {
-      showToast("Your account has no department assigned.", "error");
-      return;
-    }
-    setIsInviting(true);
-    try {
-      const token = localStorage.getItem("token");
-      const payload = {
-        name: inviteForm.name.trim(),
-        email: inviteForm.email.toLowerCase().trim(),
-        department: dept,
-        role: "employee",
-        category: inviteForm.category
-      };
-      await axios.post("http://localhost:5000/api/admin/employees", payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      showToast("Technician invited successfully!");
-      setInviteForm({ name: "", email: "", category: "General Maintenance" });
-      fetchProfileAndData();
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || "Invitation failed.";
-      if (errorMsg.toLowerCase().includes("already registered") || errorMsg.toLowerCase().includes("already exists")) {
-        showToast("This email is already registered. Use 'Resend' from the team list.", "error");
-      } else {
-        showToast(errorMsg, "error");
-      }
-    } finally {
-      setIsInviting(false);
-    }
-  };
-
-
-  const fetchComplaints = async () => {
+  e.preventDefault();
+  let dept = manager.department;
+  if (!dept || dept === "None") {
+    const savedInfo = JSON.parse(localStorage.getItem("userInfo"));
+    dept = savedInfo?.department;
+  }
+  if (!dept || dept === "None") {
+    showToast("Your account has no department assigned.", "error");
+    return;
+  }
+  setIsInviting(true);
   try {
     const token = localStorage.getItem("token");
-    const res = await axios.get("http://localhost:5000/api/complaints", {
+    const payload = {
+      name: inviteForm.name.trim(),
+      email: inviteForm.email.toLowerCase().trim(),
+      department: dept,
+      role: "employee",
+      category: inviteForm.category
+    };
+    
+    // Swapped axios.post for API.post and removed the hardcoded localhost prefix
+    await API.post("/api/admin/employees", payload, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    setComplaints(res.data); // Or setFilteredComplaints(res.data)
+    
+    showToast("Technician invited successfully!");
+    setInviteForm({ name: "", email: "", category: "General Maintenance" });
+    fetchProfileAndData();
+  } catch (err) {
+    const errorMsg = err.response?.data?.message || "Invitation failed.";
+    if (errorMsg.toLowerCase().includes("already registered") || errorMsg.toLowerCase().includes("already exists")) {
+      showToast("This email is already registered. Use 'Resend' from the team list.", "error");
+    } else {
+      showToast(errorMsg, "error");
+    }
+  } finally {
+    setIsInviting(false);
+  }
+};
+
+
+const fetchComplaints = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    
+    const res = await API.get("/api/complaints", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    setComplaints(res.data); 
   } catch (err) {
     console.error("Error fetching complaints:", err);
   }
@@ -293,8 +303,9 @@ const handleAssignWorker = async (complaintId, employeeId) => {
     const token = localStorage.getItem("token");
     const cleanId = complaintId.toString().split(':')[0];
 
-    await axios.put(
-      `http://localhost:5000/api/complaints/${cleanId}/assign-worker`,
+    // Swapped axios.put for API.put and removed the hardcoded localhost prefix
+    await API.put(
+      `/api/complaints/${cleanId}/assign-worker`,
       { employeeId }, 
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -302,7 +313,6 @@ const handleAssignWorker = async (complaintId, employeeId) => {
     showToast("Worker assigned successfully", "success");
 
     // FIX: Change 'fetchComplaints()' to whatever your loading function is named.
-    // Common names: getComplaints(), loadComplaints(), fetchData()
     if (typeof fetchComplaints === 'function') {
       fetchComplaints(); 
     } else {
@@ -318,33 +328,36 @@ const handleAssignWorker = async (complaintId, employeeId) => {
 };
 // --- Team Management Handlers ---
 
-  const handleResendInvite = async (emp) => {
-    setResendingId(emp._id);
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(`http://localhost:5000/api/admin/employees/${emp._id}/resend`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      showToast(`Activation link resent to ${emp.email}`, "success");
-    } catch (err) {
-      showToast(err.response?.data?.message || "Failed to resend link.", "error");
-    } finally {
-      setResendingId(null);
-    }
-  };
+ const handleResendInvite = async (emp) => {
+  setResendingId(emp._id);
+  try {
+    const token = localStorage.getItem("token");
+    
+    // Swapped axios.post for API.post and removed the hardcoded localhost prefix
+    await API.post(`/api/admin/employees/${emp._id}/resend`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    showToast(`Activation link resent to ${emp.email}`, "success");
+  } catch (err) {
+    showToast(err.response?.data?.message || "Failed to resend link.", "error");
+  } finally {
+    setResendingId(null);
+  }
+};
 
 const handleDeleteEmployee = async (id, name) => {
   if (!window.confirm(`Remove ${name}?`)) return;
 
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.delete(`http://localhost:5000/api/admin/employees/${id}`, {
+    
+    // Swapped axios.delete for API.delete and removed the hardcoded localhost prefix
+    const response = await API.delete(`/api/admin/employees/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     showToast(`${name} removed successfully`);
     fetchProfileAndData();
   } catch (err) {
-    // Check the console for the specific error message from the server
     console.error("Delete Error details:", err.response?.data);
     showToast(err.response?.data?.message || "Permission denied (403)", "error");
   }

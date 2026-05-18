@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import API from  "../Api.js"
 import { Link, useNavigate } from "react-router-dom";
 import { FaUserPlus, FaShieldAlt, FaCheckCircle, FaArrowLeft } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -12,23 +12,26 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+
+ const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const handleGoogleSignup = () => {
-  // Use http instead of https for local development
-  window.location.href = "http://localhost:5000/api/auth/google";
-};
-
+  const handleGoogleLogin = () => {
+    // Dynamically choose Render if live, or localhost if testing locally
+    const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    
+    // Redirect the user to the correct backend endpoint
+    window.location.href = `${BACKEND_URL}/api/auth/google`;
+  };
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault();                            
     setLoading(true);
     setStatus({ type: "", msg: "" });
 
     try {
       // --- DIRECT URL AS REQUESTED ---
-      const res = await axios.post("http://localhost:5000/api/auth/signup", formData);
+        const res = await API.post("/api/auth/signup", formData);
       
       setStatus({ 
         type: "success", 

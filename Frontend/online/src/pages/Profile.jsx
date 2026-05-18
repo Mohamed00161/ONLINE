@@ -49,121 +49,128 @@ const Profile = () => {
 
   useEffect(() => { fetchProfile(); }, []);
 
-  const fetchProfile = async () => {
-    try {
-    const res = await axios.get("http://localhost:5000/api/auth/profile", { // Added /auth
-  headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-});
-      setUser(res.data);
-      setGeneralForm({ 
-        name: res.data.name || "", 
-        email: res.data.email || "", 
-        department: res.data.role || res.data.department || "Citizen", 
-        location: res.data.location || "Not specified" 
-      });
-      setAvatarPreview(res.data.avatar);
-      // Load notification preferences if available
-      if (res.data.notifications) setNotifications(res.data.notifications);
-    } catch (err) { 
-      if (err.response?.status === 401) navigate("/login"); 
-      showToast("Failed to load profile", "error");
-    } finally { 
-      setLoading(false); 
-    }
-  };
-
-  const handleSaveGeneral = async () => {
-    setSaving(true);
-    try {
-      await axios.put("http://localhost:5000/api/update", generalForm, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-      setSaveSuccess(true);
-      showToast("Profile updated successfully");
-      setTimeout(() => setSaveSuccess(false), 3000);
-      fetchProfile(); // refresh user data
-    } catch (err) { 
-      showToast("Error saving profile", "error"); 
-    } finally { 
-      setSaving(false); 
-    }
-  };
-
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+const fetchProfile = async () => {
+  try {
+    // Swapped axios.get for API.get and removed the hardcoded localhost prefix
+    const res = await API.get("/api/auth/profile", { 
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
     
-    // Preview
-    const reader = new FileReader();
-    reader.onloadend = () => setAvatarPreview(reader.result);
-    reader.readAsDataURL(file);
+    setUser(res.data);
+    setGeneralForm({ 
+      name: res.data.name || "", 
+      email: res.data.email || "", 
+      department: res.data.role || res.data.department || "Citizen", 
+      location: res.data.location || "Not specified" 
+    });
+    setAvatarPreview(res.data.avatar);
     
-    setUploadingAvatar(true);
-    const formData = new FormData();
-    formData.append("avatar", file);
-    
-    try {
-      const res = await axios.post("http://localhost:5000/api/upload-avatar", formData, {
-        headers: { 
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "multipart/form-data"
-        }
-      });
-      setUser({ ...user, avatar: res.data.avatar });
-      showToast("Avatar updated successfully");
-    } catch (err) {
-      showToast("Avatar upload failed", "error");
-      // revert preview
-      setAvatarPreview(user?.avatar);
-    } finally {
-      setUploadingAvatar(false);
-    }
-  };
+    // Load notification preferences if available
+    if (res.data.notifications) setNotifications(res.data.notifications);
+  } catch (err) { 
+    if (err.response?.status === 401) navigate("/login"); 
+    showToast("Failed to load profile", "error");
+  } finally { 
+    setLoading(false); 
+  }
+};
 
-  const handleChangePassword = async () => {
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      showToast("New passwords do not match", "error");
-      return;
-    }
-    if (passwordForm.newPassword.length < 6) {
-      showToast("Password must be at least 6 characters", "error");
-      return;
-    }
-    setSaving(true);
-    try {
-      await axios.post("http://localhost:5000/api/change-password", {
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-      showToast("Password changed successfully");
-      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    } catch (err) {
-      showToast(err.response?.data?.message || "Failed to change password", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
+ const handleSaveGeneral = async () => {
+  setSaving(true);
+  try {
+    // Swapped axios.put for API.put and removed the hardcoded localhost prefix
+    await API.put("/api/update", generalForm, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
+    setSaveSuccess(true);
+    showToast("Profile updated successfully");
+    setTimeout(() => setSaveSuccess(false), 3000);
+    fetchProfile(); // refresh user data
+  } catch (err) { 
+    showToast("Error saving profile", "error"); 
+  } finally { 
+    setSaving(false); 
+  }
+};
 
-  const handleUpdateNotifications = async () => {
-    setSaving(true);
-    try {
-      await axios.put("http://localhost:5000/api/notifications", notifications, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-      showToast("Notification preferences saved");
-    } catch (err) {
-      showToast("Failed to save preferences", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
+const handleAvatarUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  // Preview
+  const reader = new FileReader();
+  reader.onloadend = () => setAvatarPreview(reader.result);
+  reader.readAsDataURL(file);
+  
+  setUploadingAvatar(true);
+  const formData = new FormData();
+  formData.append("avatar", file);
+  
+  try {
+    // Swapped axios.post for API.post and removed the hardcoded localhost prefix
+    const res = await API.post("/api/upload-avatar", formData, {
+      headers: { 
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "multipart/form-data" // Kept for the multipart file upload config
+      }
+    });
+    setUser({ ...user, avatar: res.data.avatar });
+    showToast("Avatar updated successfully");
+  } catch (err) {
+    showToast("Avatar upload failed", "error");
+    // revert preview
+    setAvatarPreview(user?.avatar);
+  } finally {
+    setUploadingAvatar(false);
+  }
+};
+
+const handleChangePassword = async () => {
+  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+    showToast("New passwords do not match", "error");
+    return;
+  }
+  if (passwordForm.newPassword.length < 6) {
+    showToast("Password must be at least 6 characters", "error");
+    return;
+  }
+  setSaving(true);
+  try {
+    // Swapped axios.post for API.post and removed the hardcoded localhost prefix
+    await API.post("/api/change-password", {
+      currentPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword
+    }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
+    showToast("Password changed successfully");
+    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  } catch (err) {
+    showToast(err.response?.data?.message || "Failed to change password", "error");
+  } finally {
+    setSaving(false);
+  }
+};
+
+const handleUpdateNotifications = async () => {
+  setSaving(true);
+  try {
+    // Swapped axios.put for API.put and removed the hardcoded localhost prefix
+    await API.put("/api/notifications", notifications, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
+    showToast("Notification preferences saved");
+  } catch (err) {
+    showToast("Failed to save preferences", "error");
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleRevokeSession = async (sessionId) => {
     if (window.confirm("Revoke this session? You will be logged out from that device.")) {
       try {
-        await axios.post(`http://localhost:5000/api/revoke-session/${sessionId}`, {}, {
+        await API.post(`/api/revoke-session/${sessionId}`, {}, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         showToast("Session revoked");

@@ -5,13 +5,15 @@ const ManageComplaints = () => {
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
-    API.get("https://online-backend-8khb.onrender.com/api/complaints")
+    // Stripped out the full Render URL—API handles it!
+    API.get("/api/complaints")
       .then((res) => setComplaints(res.data))
       .catch(() => alert("Error"));
   }, []);
 
   const updateStatus = async (id, status) => {
-    await API.put(`https://online-backend-8khb.onrender.com/api/complaints/${id}`, { status });
+    // Stripped out the full Render URL here as well
+    await API.put(`/api/complaints/${id}`, { status });
     setComplaints(
       complaints.map((c) =>
         c._id === id ? { ...c, status } : c

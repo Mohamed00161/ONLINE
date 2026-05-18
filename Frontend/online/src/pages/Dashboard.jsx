@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import API from "../Api.js";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext.jsx";
 
@@ -133,46 +133,54 @@ const UserDashboard = () => {
   const showToast = (message, type = 'success') => setToast({ message, type });
 
   // Fetch Data
-  const fetchUserProfile = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return navigate("/login");
-      const res = await axios.get("http://localhost:5000/api/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(res.data);
-    } catch (err) { navigate("/login"); }
-  };
+const fetchUserProfile = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return navigate("/login");
+    
+    // Changed axios.get to API.get and removed localhost
+    const res = await API.get("/api/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setUser(res.data);
+  } catch (err) { 
+    navigate("/login"); 
+  }
+};
 
-  const fetchUserComplaints = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/complaints/my", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setComplaints(res.data || []);
-    } catch (err) {
-      console.error("Error fetching complaints");
-      showToast("Failed to load complaints", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchUserComplaints = async () => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    
+    // Changed axios.get to API.get and removed localhost
+    const res = await API.get("/api/complaints/my", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setComplaints(res.data || []);
+  } catch (err) {
+    console.error("Error fetching complaints");
+    showToast("Failed to load complaints", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this report permanently?")) return;
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/complaints/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      showToast("Complaint deleted successfully");
-      fetchUserComplaints();
-    } catch (err) {
-      showToast("Delete failed", "error");
-    }
-  };
+const handleDelete = async (id) => {
+  if (!window.confirm("Delete this report permanently?")) return;
+  try {
+    const token = localStorage.getItem("token");
+    
+    // Changed axios.delete to API.delete and removed localhost
+    await API.delete(`/api/complaints/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    showToast("Complaint deleted successfully");
+    fetchUserComplaints();
+  } catch (err) {
+    showToast("Delete failed", "error");
+  }
+};
 
   const toggleRow = (id) => {
     setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import axios from "axios";
+import API from "../Api";
 import { useNavigate, Link } from "react-router-dom";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend
@@ -106,32 +106,38 @@ const EmployeeDashboard = () => {
 
   const showToast = (message, type = 'success') => setToast({ message, type });
 
-  const fetchUserProfile = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return navigate("/login");
-      const res = await axios.get("http://localhost:5000/api/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(res.data);
-    } catch (err) { navigate("/login"); }
-  };
+const fetchUserProfile = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return navigate("/login");
+    
+    // Swapped axios.get for API.get and removed the hardcoded localhost prefix
+    const res = await API.get("/api/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setUser(res.data);
+  } catch (err) { 
+    navigate("/login"); 
+  }
+};
 
-  const fetchComplaints = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/complaints/assigned", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setComplaints(res.data || []);
-    } catch (err) {
-      console.error("Fetch error", err);
-      showToast("Failed to load complaints", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchComplaints = async () => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    
+    // Swapped axios.get for API.get and removed the hardcoded localhost prefix
+    const res = await API.get("/api/complaints/assigned", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setComplaints(res.data || []);
+  } catch (err) {
+    console.error("Fetch error", err);
+    showToast("Failed to load complaints", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchUserProfile();
@@ -147,31 +153,34 @@ const EmployeeDashboard = () => {
     setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleResolve = async () => {
-    if (!resolutionNote.trim()) {
-      showToast("Please provide resolution notes.", "error");
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/complaints/${selectedTask._id}/resolve`,
-        {
-          resolutionNotes: resolutionNote,
-          status: "Resolved"
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setSelectedTask(null);
-      setResolutionNote("");
-      await fetchComplaints();
-      showToast("Job completed successfully. Department Manager notified.", "success");
-    } catch (err) {
-      showToast("Error updating ticket. Please try again.", "error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+const handleResolve = async () => {
+  if (!resolutionNote.trim()) {
+    showToast("Please provide resolution notes.", "error");
+    return;
+  }
+  setIsSubmitting(true);
+  try {
+    const token = localStorage.getItem("token");
+    
+    // Swapped axios.put for API.put and removed the hardcoded localhost prefix
+    await API.put(`/api/complaints/${selectedTask._id}/resolve`,
+      {
+        resolutionNotes: resolutionNote,
+        status: "Resolved"
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    setSelectedTask(null);
+    setResolutionNote("");
+    await fetchComplaints();
+    showToast("Job completed successfully. Department Manager notified.", "success");
+  } catch (err) {
+    showToast("Error updating ticket. Please try again.", "error");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const stats = useMemo(() => ({
     total: complaints.length,

@@ -5,7 +5,8 @@ const MyComplaints = () => {
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
-    API.get("https://online-backend-8khb.onrender.com/api/complaints")
+    // Stripped out the full Render URL prefix—your API instance adds it automatically!
+    API.get("/api/complaints")
       .then((res) => setComplaints(res.data))
       .catch(() => alert("Error fetching complaints"));
   }, []);
